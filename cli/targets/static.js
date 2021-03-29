@@ -392,6 +392,8 @@ function buildType(ref, type) {
             var jsType = toJsType(field);
             if (field.optional && !field.map && !field.repeated && field.resolvedType instanceof Type)
                 jsType = jsType + "|null|undefined";
+            else if(field.optional)
+                jsType = jsType + "|undefined";
             pushComment([
                 field.comment || type.name + " " + field.name + ".",
                 "@member {" + jsType + "} " + field.name,
@@ -402,20 +404,7 @@ function buildType(ref, type) {
             push("");
             firstField = false;
         }
-        if (field.repeated)
-            push(escapeName(type.name) + ".prototype" + prop + " = $util.emptyArray;"); // overwritten in constructor
-        else if (field.map)
-            push(escapeName(type.name) + ".prototype" + prop + " = $util.emptyObject;"); // overwritten in constructor
-        else if (field.long)
-            push(escapeName(type.name) + ".prototype" + prop + " = $util.Long ? $util.Long.fromBits("
-                    + JSON.stringify(field.typeDefault.low) + ","
-                    + JSON.stringify(field.typeDefault.high) + ","
-                    + JSON.stringify(field.typeDefault.unsigned)
-                + ") : " + field.typeDefault.toNumber(field.type.charAt(0) === "u") + ";");
-        else if (field.bytes) {
-            push(escapeName(type.name) + ".prototype" + prop + " = $util.newBuffer(" + JSON.stringify(Array.prototype.slice.call(field.typeDefault)) + ");");
-        } else
-            push(escapeName(type.name) + ".prototype" + prop + " = " + JSON.stringify(field.typeDefault) + ";");
+        push(escapeName(type.name) + ".prototype" + prop + " = undefined;");
     });
 
     // virtual oneof fields
